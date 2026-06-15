@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Okta + AWS AgentCore — Field Decision Guide</title>
+<style>
+  :root {
+    --okta: #007DC1;
+    --okta-light: #E8F4FC;
+    --aws: #FF9900;
+    --aws-light: #FFF4E6;
+    --both: #1B8354;
+    --both-light: #E6F4EE;
+    --bg: #F7F8FA;
+    --card: #FFFFFF;
+    --border: #E2E6EA;
+    --text: #1A1D23;
+    --muted: #6B7280;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    background: linear-gradient(135deg, #1A1D23 0%, #2D3748 100%);
+    color: white;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.25);
+  }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .badge-okta {
+    background: var(--okta); color: white;
+    padding: 4px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
+  }
+  .badge-aws {
+    background: var(--aws); color: #1A1D23;
+    padding: 4px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
+  }
+  .topbar h1 { font-size: 16px; font-weight: 600; color: #F0F0F0; }
+  .topbar-tag {
+    font-size: 11px; color: #9CA3AF;
+    border: 1px solid #4B5563; border-radius: 4px;
+    padding: 2px 8px;
+  }
+
+  /* JUMP NAV */
+  .jumpnav {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 32px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .jumpnav::-webkit-scrollbar { display: none; }
+  .jumpnav a {
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    transition: all 0.15s;
+  }
+  .jumpnav a:hover { background: var(--okta); color: white; border-color: var(--okta); }
+
+  /* HERO */
+  .hero {
+    text-align: center;
+    padding: 40px 32px 28px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .hero-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--okta);
+    margin-bottom: 10px;
+  }
+  .hero h2 {
+    font-size: 28px; font-weight: 700; line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  .hero p {
+    font-size: 15px; color: var(--muted);
+    max-width: 680px; margin: 0 auto 24px;
+  }
+
+  /* LEGEND */
+  .legend {
+    display: flex; gap: 16px; justify-content: center;
+    flex-wrap: wrap; margin-bottom: 8px;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600;
+  }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+  /* MAIN MATRIX */
+  .matrix-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 16px 24px 48px;
+  }
+
+  .use-case-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  .use-case-card:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.11); }
+
+  .card-header {
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+    transition: background 0.15s;
+  }
+  .card-header:hover { background: #FAFBFD; }
+  .card-header.open { border-bottom-color: var(--border); }
+
+  .uc-num {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .card-title-area { display: flex; flex-direction: column; gap: 4px; }
+  .card-title { font-size: 15px; font-weight: 700; }
+  .card-scenario { font-size: 12px; color: var(--muted); }
+
+  .who-leads-pills { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+  .pill {
+    font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 20px;
+    letter-spacing: 0.3px;
+  }
+  .pill-okta { background: var(--okta-light); color: var(--okta); }
+  .pill-aws  { background: var(--aws-light);  color: #B45309; }
+  .chevron {
+    margin-left: 12px;
+    font-size: 12px; color: var(--muted);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .card-header.open .chevron { transform: rotate(180deg); }
+
+  /* Card body */
+  .card-body { display: none; padding: 20px; }
+  .card-body.open { display: block; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+  .role-block { border-radius: 8px; padding: 14px 16px; }
+  .role-block.okta-block { background: var(--okta-light); border-left: 3px solid var(--okta); }
+  .role-block.aws-block  { background: var(--aws-light);  border-left: 3px solid var(--aws); }
+
+  .role-label {
+    font-size: 10px; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 6px;
+  }
+  .role-label.okta { color: var(--okta); }
+  .role-label.aws  { color: #B45309; }
+  .role-text { font-size: 13px; line-height: 1.55; }
+
+  .bottom-line {
+    background: #F0FDF4;
+    border: 1px solid #A7F3D0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .bl-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .bl-label { font-size: 10px; font-weight: 800; letter-spacing: 1px; color: var(--both); text-transform: uppercase; margin-bottom: 4px; }
+  .bl-text { font-size: 13px; color: #064E3B; line-height: 1.5; }
+
+  .copy-btn {
+    margin-top: 10px;
+    background: none;
+    border: 1px solid #A7F3D0;
+    color: var(--both);
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { background: var(--both); color: white; border-color: var(--both); }
+  .copy-btn.copied { background: var(--both); color: white; border-color: var(--both); }
+
+  /* FILTER BAR */
+  .filter-bar {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .filter-btn {
+    font-size: 12px; font-weight: 600;
+    padding: 6px 16px; border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--muted);
+  }
+  .filter-btn.active { background: #1A1D23; color: white; border-color: #1A1D23; }
+
+  /* ARCH DIAGRAM */
+  .arch-diagram {
+    background: #FAFBFC;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 10px 10px;
+    margin-bottom: 14px;
+    overflow-x: auto;
+  }
+  .arch-diagram svg { display: block; margin: 0 auto; }
+  .diag-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--muted); margin-bottom: 8px;
+  }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    background: var(--card);
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="badge-okta">OKTA</span>
+    <span style="color:#4B5563; font-size:18px;">+</span>
+    <span class="badge-aws">AWS AgentCore</span>
+    <span style="color:#4B5563; font-size:16px; margin: 0 4px;">|</span>
+    <h1>Field Decision Guide</h1>
+  </div>
+  <span class="topbar-tag">&#128274; Internal Only</span>
+</div>
+
+<!-- JUMP NAV -->
+<div class="jumpnav">
+  <a href="#uc1">1. Zero-Trust Inbound Agent Activation</a>
+  <a href="#uc2">2. Cross-Boundary Tool Execution</a>
+  <a href="#uc3">3. Secure AWS Resource Invocation</a>
+  <a href="#uc4">4. Agent Kill Switch</a>
+  <a href="#uc5">5. Fine-Grained Authorization</a>
+  <a href="#uc6">6. Human in the Loop</a>
+  <a href="#uc7">7. Token Vault Usage</a>
+  <a href="#uc8">8. Registering Agents</a>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-label">Joint Okta &amp; AgentCore Use Cases (Where They Interlock)</div>
+  <h2>When to use Okta &amp; when to use AWS AgentCore</h2>
+  <p>Your in-conversation reference for customer meetings. Each card answers a real scenario. Lead with the <strong>Bottom Line</strong> — that's your talking point.</p>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--okta)"></div>Okta leads</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--aws)"></div>AgentCore leads</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--both)"></div>Both required</div>
+  </div>
+</div>
+
+<!-- MATRIX -->
+<div class="matrix-wrap">
+
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterCards('all', this)">All 8 Use Cases</button>
+    <button class="filter-btn" onclick="filterCards('okta', this)">&#9679; Okta Leads (2)</button>
+    <button class="filter-btn" onclick="filterCards('aws', this)">&#9679; AgentCore Leads (2)</button>
+    <button class="filter-btn" onclick="filterCards('both', this)">&#9679; Both Required (4)</button>
+  </div>
+
+  <!-- UC 1 -->
+  <div class="use-case-card" id="uc1" data-who="okta">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="uc-num" style="background:#EEF6FC; color:var(--okta)">1</div>
+      <div class="card-title-area">
+        <div class="card-title">Use Case 1: Zero-Trust Inbound Agent Activation</div>
+        <div class="card-scenario">Restricting the environment launch of high-privilege AI workloads to authenticated, risk-verified employees only.</div>
+      </div>
+      <div class="who-leads-pills">
+        <span class="pill pill-okta">Okta</span>
+        <span class="pill pill-aws">AgentCore</span>
+        <span class="chevron">&#9660;</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="arch-diagram">
+        <div class="diag-label">Architecture Flow</div>
+        <img src="https://lh3.googleusercontent.com/d/1g6pBQylrI6jmasGZwnTqXgZbD8hVSR7U" alt="UC1 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
+      </div>
+      <div class="two-col">
+        <div class="role-block okta-block">
+          <div class="role-label okta">Okta's Role</div>
+          <div class="role-text">Evaluates corporate credentials, network egress flags, and real-time device health to issue a secure user access token. In practice, the agent cannot launch unless the requesting employee has authenticated with Okta MFA, passed device compliance checks, and cleared any active risk signals — making Okta as the gatekeeper.</div>
+        </div>
+        <div class="role-block aws-block">
+          <div class="role-label aws">AgentCore's Role</div>
+          <div class="role-text">Intercepts the request at the entry, validates Okta's access token, and spins up a runtime session. Every agent is gated on a verifiable Okta JWT — any session launched without a valid, unexpired token is rejected at the perimeter before any access is provisioned.</div>
+        </div>
+      </div>
+      <div class="bottom-line">
+        <div class="bl-icon">&#128161;</div>
+        <div>
+          <div class="bl-label">The Bottom Line</div>
+          <div class="bl-text">Okta secures the enterprise perimeter; AgentCore leverages that validation to safely spin up the underlying AI compute space.</div>
+          <button class="copy-btn" onclick="copyText(this, 'Okta secures the enterprise perimeter; AgentCore leverages that validation to safely spin up the underlying AI compute space.')">&#128203; Copy talking point</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UC 2 -->
+  <div class="use-case-card" id="uc2" data-who="both">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="uc-num" style="background:#FFF4E6; color:#B45309">2</div>
+      <div class="card-title-area">
+        <div class="card-title">Use Case 2: Cross App Access (On-Behalf-Of a user flow)</div>
+        <div class="card-scenario">An agent needs to securely fetch data from an external API (e.g., Salesforce or Slack) with a specific user's authority.</div>
+      </div>
+      <div class="who-leads-pills">
+        <span class="pill pill-okta">Okta</span>
+        <span class="pill pill-aws">AgentCore</span>
+        <span class="chevron">&#9660;</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="arch-diagram">
+        <div class="diag-label">Architecture Flow</div>
+        <img src="https://lh3.googleusercontent.com/d/1J5JZ637nHxs_W4hIFsaXsuzXmV337a0w" alt="UC2 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
+      </div>
+      <div class="two-col">
+        <div class="role-block okta-block">
+          <div class="role-label okta">Okta's Role</div>
+          <div class="role-text">Acts as the Authorization Server to enforce global identity topologies and eliminate point-to-point app connections. It mints a token that cryptographically binds the human user and agent identities together. This allows the agent to cross application boundaries securely without exposing primary user tokens or relying on siloed, hardcoded credentials</div>
+        </div>
+        <div class="role-block aws-block">
+          <div class="role-label aws">AgentCore's Role</div>
+          <div class="role-text">Triggers the exchange handshake, caches the resulting token inside its credential provider, and injects it into outbound API headers via the AgentCore Gateway. This means the agent developer never writes token-refresh logic — credential lifecycle is a runtime concern handled entirely by AgentCore, not the application.</div>
+        </div>
+      </div>
+      <div class="bottom-line">
+        <div class="bl-icon">&#128161;</div>
+        <div>
+          <div class="bl-label">The Bottom Line</div>
+          <div class="bl-text">Okta serves as the cryptographic authority to grant cross-boundary access; AgentCore handles real-time credential caching and transport.</div>
+          <button class="copy-btn" onclick="copyText(this, 'Okta serves as the cryptographic authority to grant cross-boundary access; AgentCore handles real-time credential caching and transport.')">&#128203; Copy talking point</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UC 3 -->
+  <div class="use-case-card" id="uc3" data-who="aws">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="uc-num" style="background:#FFF4E6; color:#B45309">3</div>
+      <div class="card-title-area">
+        <div class="card-title">Use Case 3: Secure AWS Resource Invocation</div>
+        <div class="card-scenario">An agent must securely invoke native AWS resources (code interpreter, web browser, or databases) through AgentCore's gateway.</div>
+      </div>
+      <div class="who-leads-pills">
+        <span class="pill pill-okta">Okta</span>
+        <span class="pill pill-aws">AgentCore</span>
+        <span class="chevron">&#9660;</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="arch-diagram">
+        <div class="diag-label">Architecture Flow</div>
+        <img src="https://lh3.googleusercontent.com/d/1XKWdX2tq0YreEs-LT4pFiTbDZ4CB2z0x" alt="UC3 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
+      </div>
+      <div class="two-col">
+        <div class="role-block okta-block">
+          <div class="role-label okta">Okta's Role</div>
+          <div class="role-text">Provides the initial access token and authorization context that verifies the agent is permitted to invoke an agent tool on the user's behalf. Okta issues scopes that carries exactly which resource the user can access  — this becomes the identity proof for AgentCore .</div>
+        </div>
+        <div class="role-block aws-block">
+          <div class="role-label aws">AgentCore's Role</div>
+          <div class="role-text">Configures the execution environment, routes agent tool calls through its gateway for policy enforcement, and invokes native AWS resources (Code Interpreter, Web Browser, DynamoDB, RDS) securely. AgentCore translates the agent's intent into a concrete, permissioned AWS API call, executes it in an isolated session, and returns only the result the agent is authorized to see — keeping the execution blast radius tightly bounded.</div>
+        </div>
+      </div>
+      <div class="bottom-line">
+        <div class="bl-icon">&#128161;</div>
+        <div>
+          <div class="bl-label">The Bottom Line</div>
+          <div class="bl-text">Okta authorizes the agent with an access token; AgentCore's gateway enforces policies and routes calls securely to native AWS compute and data resources.</div>
+          <button class="copy-btn" onclick="copyText(this, 'Okta authorizes the agent with an access token; AgentCore\'s gateway enforces policies and routes calls securely to native AWS compute and data resources.')">&#128203; Copy talking point</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UC 4 -->
+  <div class="use-case-card" id="uc4" data-who="both">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="uc-num" style="background:#FEF3C7; color:#92400E">4</div>
+      <div class="card-title-area">
+        <div class="card-title">Use Case 4: Agent Kill Switch</div>
+        <div class="card-scenario">Instantly freezing a live AI reasoning loop the exact second a security team flags an active user session as compromised.</div>
+      </div>
+      <div class="who-leads-pills">
+        <span class="pill pill-okta">Okta</span>
+        <span class="pill pill-aws">AgentCore</span>
+        <span class="chevron">&#9660;</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="arch-diagram">
+        <div class="diag-label">Architecture Flow</div>
+        <img src="https://lh3.googleusercontent.com/d/1H6eMsNN9zXDPcJTfDz7nhrbZlAkKt5rO" alt="UC4 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
+      </div>
+      <div class="two-col">
+        <div class="role-block okta-block">
+          <div class="role-label okta">Okta's Role</div>
+          <div class="role-text">Detects identity-level risks via Continuous Access Evaluation and fires a back-channel revocation signal the moment an agent is flagged, a threat intelligence hit, or a behavioral signal received from AgentCore itself. This happens in real time, not at the next token expiration.</div>
+        </div>
+        <div class="role-block aws-block">
+          <div class="role-label aws">AgentCore's Role</div>
+          <div class="role-text">Intercepts Okta's revocation signal and immediately kills the running agent session. The agent doesn't finish its current reasoning step — the loop is stopped, all pending tool calls are dropped, and the compute thread is terminated before the compromised session can cause further damage.</div>
+        </div>
+      </div>
+      <div class="bottom-line">
+        <div class="bl-icon">&#128161;</div>
+        <div>
+          <div class="bl-label">The Bottom Line</div>
+          <div class="bl-text">Okta serves as the central radar that detects the identity compromise; AgentCore acts as the emergency brake that stops the AI compute loop before damage occurs.</div>
+          <button class="copy-btn" onclick="copyText(this, 'Okta serves as the central radar that detects the identity compromise; AgentCore acts as the emergency brake that stops the AI compute loop before damage occurs.')">&#128203; Copy talking point</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UC 5 -->
+  <div class="use-case-card" id="uc5" data-who="okta">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="uc-num" style="background:#EEF6FC; color:var(--okta)">5</div>
+      <div class="card-title-area">
+        <div class="card-title">Use Case 5: Fine-Grained Authorization</div>
+        <div class="card-scenario">Designing a secure system that handles both identity relationship rules and agent guardrails simultaneously.</div>
+      </div>
+      <div class="who-leads-pills">
+        <span class="pill pill-okta">Okta</span>
+        <span class="pill pill-aws">AgentCore</span>
+        <span class="chevron">&#9660;</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="arch-diagram">
+        <div class="diag-label">Architecture Flow — Two Parallel Authorization Checks</div>
+        <img src="https://lh3.googleusercontent.com/d/1yhrMrXH0XNrkre0cUSiIjJg1BoAANiFs" alt="UC5 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
+      </div>
+      <div class="two-col">
+        <div class="role-block okta-block">
+          <div class="role-label okta">Okta's Role</div>
+          <div class="role-text">Governs identity relationships and organizational graphs using Okta FGA (ReBAC) to answer coarse-grained ownership questions — for example, whether the requesting user has a direct or inherited relationship that permits the agent to access a specific SaaS Application. This  helps AgentCore to enforce the agent's authorization scope so the agent can't even try to reach data outside its authorized scope.</div>
+        </div>
+        <div class="role-block aws-block">
+          <div class="role-label aws">AgentCore's Role</div>
+          <div class="role-text">Monitors real-time payload safety checks at the gateway, parsing tool-call parameters and enforcing Cedar policies to block unsafe or out-of-scope values before they reach any backend. Even if Okta grants relational access, AgentCore applies a second, millisecond-level gate on what the agent is actually about to do.</div>
+        </div>
+      </div>
+      <div class="bottom-line">
+        <div class="bl-icon">&#128161;</div>
+        <div>
+          <div class="bl-label">The Bottom Line</div>
+          <div class="bl-text">Okta FGA governs the organizational who and what; AgentCore handles the immediate, millisecond-level tool safety checks governing the how.</div>
+          <button class="copy-btn" onclick="copyText(this, 'Okta FGA governs the organizational who and what; AgentCore handles the immediate, millisecond-level tool safety checks governing the how.')">&#128203; Copy talking point</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UC 6 -->
+  <div class="use-case-card" id="uc6" data-who="aws">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="uc-num" style="background:#F0FDF4; color:var(--both)">6</div>
+      <div class="card-title-area">
+        <div class="card-title">Use Case 6: Human in the Loop</div>
+        <div class="card-scenario">Managing high-stakes operations where an agent triggers sensitive tasks, such as substantial financial transfers or critical database modifications.</div>
+      </div>
+      <div class="who-leads-pills">
+        <span class="pill pill-aws">AgentCore</span>
+        <span class="pill pill-okta">Okta</span>
+        <span class="chevron">&#9660;</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="arch-diagram">
+        <div class="diag-label">Architecture Flow — Pause, Verify, Resume</div>
+        <img src="https://lh3.googleusercontent.com/d/144VpGW4mwWyvpdzPFiiO1tj6cdS4G1G4" alt="UC6 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
+      </div>
+      <div class="two-col">
+        <div class="role-block okta-block">
+          <div class="role-label okta">Okta's Role</div>
+          <div class="role-text">Provides the high-assurance verification layer by issuing a step-up challenge — typically an Okta Verify push or WebAuthn prompt — to the supervisor's registered device. The agent thread cannot resume until Okta receives and validates that cryptographic human sign-off, making it impossible for the agent to self-approve a sensitive action.</div>
+        </div>
+        <div class="role-block aws-block">
+          <div class="role-label aws">AgentCore's Role</div>
+          <div class="role-text">Detects a sensitive tool execution attempt against its HITL policy — such as a transaction over a defined threshold or an irreversible database operation — and hard-pauses the state machine before the tool is invoked. No further model output is generated and no tool call fires until AgentCore receives the signed confirmation callback from Okta.</div>
+        </div>
+      </div>
+      <div class="bottom-line">
+        <div class="bl-icon">&#128161;</div>
+        <div>
+          <div class="bl-label">The Bottom Line</div>
+          <div class="bl-text">Use AgentCore to intercept exceptions and pause the runtime; use Okta to facilitate the secure out-of-band identity verification needed to resume work.</div>
+          <button class="copy-btn" onclick="copyText(this, 'Use AgentCore to intercept exceptions and pause the runtime; use Okta to facilitate the secure out-of-band identity verification needed to resume work.')">&#128203; Copy talking point</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UC 7 -->
+  <div class="use-case-card" id="uc7" data-who="both">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="uc-num" style="background:#F5F3FF; color:#6D28D9">7</div>
+      <div class="card-title-area">
+        <div class="card-title">Use Case 7: Token Vault Usage</div>
+        <div class="card-scenario">Agent is executing a multi-step orchestration thread that takes more than 15-minutes. The token must be rotated without breaking the model inference.</div>
+      </div>
+      <div class="who-leads-pills">
+        <span class="pill pill-okta">Okta</span>
+        <span class="pill pill-aws">AgentCore</span>
+        <span class="chevron">&#9660;</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="arch-diagram">
+        <div class="diag-label">Architecture Flow — Continuous Token Rotation (Mid-Flight)</div>
+        <img src="https://lh3.googleusercontent.com/d/1jI8nsDTBp1gHxlDHgncSlpPvv6YwIw6v" alt="UC7 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
+      </div>
+      <div class="two-col">
+        <div class="role-block okta-block">
+          <div class="role-label okta">Okta's Role</div>
+          <div class="role-text">Acts as the central Token Exchange Server, holding long-lived refresh credentials in a secure vault completely isolated from the LLM runtime. When AgentCore signals that a short-lived token is nearing expiry, Okta validates the session hasn't been revoked and mints a fresh, narrowly scoped credential — ensuring the agent always operates with the minimum necessary access for exactly the resource it's currently using.</div>
+        </div>
+        <div class="role-block aws-block">
+          <div class="role-label aws">AgentCore's Role</div>
+          <div class="role-text">Acts as the Token Exchange Client, with its runtime Token Vault continuously monitoring active token TTLs. As a token approaches expiry, AgentCore proactively calls Okta's exchange endpoint and hot-swaps the credential in place — the agent's state machine keeps running with no visible gap, and no token-refresh logic needs to be written by the developer.</div>
+        </div>
+      </div>
+      <div class="bottom-line">
+        <div class="bl-icon">&#128161;</div>
+        <div>
+          <div class="bl-label">The Bottom Line</div>
+          <div class="bl-text">Okta securely governs master application credential lifecycles at the enterprise perimeter; AgentCore manages token execution continuity inside the agent runtime environment.</div>
+          <button class="copy-btn" onclick="copyText(this, 'Okta securely governs master application credential lifecycles at the enterprise perimeter; AgentCore manages token execution continuity inside the agent runtime environment.')">&#128203; Copy talking point</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- UC 8 -->
+  <div class="use-case-card" id="uc8" data-who="both">
+    <div class="card-header" onclick="toggle(this)">
+      <div class="uc-num" style="background:#FFF7ED; color:#C2410C">8</div>
+      <div class="card-title-area">
+        <div class="card-title">Use Case 8: Registering Agents</div>
+        <div class="card-scenario">Tracking and managing an AI agent requires both strict regulatory compliance oversight across the enterprise and an optimized, dynamic runtime execution engine.</div>
+      </div>
+      <div class="who-leads-pills">
+        <span class="pill pill-okta">Okta</span>
+        <span class="pill pill-aws">AgentCore</span>
+        <span class="chevron">&#9660;</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="arch-diagram">
+        <div class="diag-label">Architecture Flow — Dual Registry: Identity + Runtime Governance</div>
+        <img src="presentation/diagrams/UC8_Registering_Agents.png" alt="UC8 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
+
+      </div>
+      <div class="two-col">
+        <div class="role-block okta-block">
+          <div class="role-label okta">Okta's Role</div>
+          <div class="role-text">Registers the agent as a governed entity and binds it to a human supervisor, a cost center, and business attributes — establishing its legal right to operate within the enterprise. Every agent action is therefore traceable back to a responsible human owner, and the business can discover, audit, or revoke any agent through the same identity governance tooling used for human employees.</div>
+        </div>
+        <div class="role-block aws-block">
+          <div class="role-label aws">AgentCore's Role</div>
+          <div class="role-text">Catalogs the actual runtime identity of each agent — model version, prompt templates, vector database indices, and MCP tool schemas — and tracks changes over time. If an agent's behavior shifts unexpectedly, both the code-level artifact that changed and the human accountable for it (from Okta's registry) can be immediately identified, creating a complete governance chain from business identity to execution stack.</div>
+        </div>
+      </div>
+      <div class="bottom-line">
+        <div class="bl-icon">&#128161;</div>
+        <div>
+          <div class="bl-label">The Bottom Line</div>
+          <div class="bl-text">Okta establishes the agent's corporate identity and liability framework, while AgentCore builds and tracks its cognitive engine. Aligning both registries prevents the deployment of untracked "shadow AI" and ensures every functional agent is fully accounted for by the business.</div>
+          <button class="copy-btn" onclick="copyText(this, 'Okta establishes the agent\'s corporate identity and liability framework, while AgentCore builds and tracks its cognitive engine. Aligning both registries prevents the deployment of untracked shadow AI and ensures every functional agent is fully accounted for by the business.')">&#128203; Copy talking point</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Okta + AWS AgentCore &nbsp;&middot;&nbsp; Internal Use Only &nbsp;&middot;&nbsp; Source: "Better Together: O4AA &amp; AWS AgentCore" solution blueprint
+</div>
+
+<script>
+  function toggle(header) {
+    header.classList.toggle('open');
+    header.nextElementSibling.classList.toggle('open');
+  }
+
+  function filterCards(type, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.use-case-card').forEach(card => {
+      card.style.display = (type === 'all' || card.dataset.who === type) ? '' : 'none';
+    });
+  }
+
+  function copyText(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = btn.innerHTML;
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 1800);
+    });
+  }
+
+  // Open first card by default
+  document.querySelector('.card-header').click();
+</script>
+</body>
+</html>
