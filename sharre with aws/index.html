@@ -508,7 +508,7 @@
       <div class="two-col">
         <div class="role-block okta-block">
           <div class="role-label okta">Okta's Role</div>
-          <div class="role-text">Provides the high-assurance verification layer by issuing a step-up challenge — typically an Okta Verify push or WebAuthn prompt — to the supervisor's registered device. The agent thread cannot resume until Okta receives and validates that cryptographic human sign-off, making it impossible for the agent to self-approve a sensitive action.</div>
+          <div class="role-text">Sends an Okta Verify push to the approver's device and waits for confirmation before the agent takes any action — ensuring a human, not the agent, makes the final call on sensitive requests. Supervisor lookup and structured approval escalation are planned for the GA release.</div>
         </div>
         <div class="role-block aws-block">
           <div class="role-label aws">AgentCore's Role</div>
