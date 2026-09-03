@@ -416,7 +416,7 @@
           <button class="copy-btn" onclick="copyText(this, 'Okta serves as the cryptographic authority to grant cross-boundary access; AgentCore handles real-time credential caching and transport.')">&#128203; Copy talking point</button>
         </div>
       </div>
-      <p style="font-size:11px; color:var(--muted); font-style:italic; margin-top:10px;">&#128221; <strong>Note:</strong> The Lambda interceptor pattern is an interim solution. The partnership team is actively collaborating with AWS to build native cross-app access directly into the AWS AgentCore credential provider, which will eliminate this custom pattern and make token handling completely seamless.</p>
+      <p style="font-size:11px; color:var(--muted); font-style:italic; margin-top:10px;">&#128221; <strong>Note:</strong> The Lambda interceptor pattern is an interim solution, required because cross-app access is not yet natively supported between Okta and AWS AgentCore. The partnership team is actively collaborating with AWS to build native cross-app access directly into the AWS AgentCore credential provider, which will eliminate existing custom code pattern and make token handling completely seamless.</p>
     </div>
   </div>
 
@@ -467,7 +467,7 @@
       </div>
     <div class="card-body">
       <div class="arch-diagram">
-        <div class="diag-label">Architecture Flow — Two Parallel Authorization Checks</div>
+        <div class="diag-label">Architecture Flow — Two Complementary Authorization Layers</div>
         <img src="diagrams/UC5_Fine_Grained_Authorization.png" alt="UC6 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
       </div>
       <div class="two-col">
@@ -477,15 +477,15 @@
         </div>
         <div class="role-block aws-block">
           <div class="role-label aws">AgentCore's Role</div>
-          <div class="role-text">AgentCore's Cedar policy engine evaluates tool-call parameters including the claims present in the token. If a tool call contains unsafe or out-of-scope values, it is blocked at the gateway before reaching any backend. The result is written to AgentCore's own audit log.</div>
+          <div class="role-text">AgentCore's Cedar policy engine is attached to the AgentCore Gateway and evaluates each MCP tool call before it is invoked — independently guarding the execution layer. It evaluates tool-call parameters including the claims present in the token, and blocks any unsafe or out-of-scope call at the gateway before it reaches any backend. The result is written to AgentCore's own audit log.</div>
         </div>
       </div>
       <div class="bottom-line">
         <div class="bl-icon">&#128161;</div>
         <div>
           <div class="bl-label">The Bottom Line</div>
-          <div class="bl-text">Two sequentially applied but independently audited authorization layers — no shared state, no cross-calls between them. Okta's fine-grained permissions answer whether the IdP relationship permits access; AgentCore's Cedar engine answers whether the agent's tool call is safe to execute. Failing either check blocks the action, but neither system depends on the other to reach its decision.</div>
-          <button class="copy-btn" onclick="copyText(this, 'Two sequentially applied but independently audited authorization layers — no shared state, no cross-calls between them. Okta\'s fine-grained permissions answer whether the user relationship permits access; AgentCore\'s Cedar engine answers whether the agent\'s tool call is safe to execute. Failing either check blocks the action, but neither system depends on the other to reach its decision.')">&#128203; Copy talking point</button>
+          <div class="bl-text">Two authorization layers, each independently guarding its own domain — together they provide end-to-end coverage across both the identity and execution layers. Okta's fine-grained permissions answer whether the identity relationship permits access; AgentCore's Cedar engine answers whether the specific tool call is authorized to invoke. Failing either check blocks the action, and the combination covers risk surfaces that neither system could address alone.</div>
+          <button class="copy-btn" onclick="copyText(this, 'Two authorization layers, each independently guarding its own domain — together they provide end-to-end coverage across both the identity and execution layers. Okta\'s fine-grained permissions answer whether the identity relationship permits access; AgentCore\'s Cedar engine answers whether the specific tool call is safe to invoke. Failing either check blocks the action, and the combination covers risk surfaces that neither system could address alone.')">&#128203; Copy talking point</button>
         </div>
       </div>
     </div>
