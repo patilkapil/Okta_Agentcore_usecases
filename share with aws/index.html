@@ -292,9 +292,8 @@
   <a href="#uc1">1. Registering Agents</a>
   <a href="#uc2">2. Zero-Trust Inbound Agent Activation</a>
   <a href="#uc3">3. Cross App Access</a>
-  <a href="#uc4">4. Agent Risk Signaling &amp; Coordinated Remediation</a>
-  <a href="#uc5">5. Two Independent Authorization Layers</a>
-  <a href="#uc6">6. Human in the Loop</a>
+  <a href="#uc5">4. Two Independent Authorization Layers</a>
+  <a href="#uc6">5. Human in the Loop</a>
 </div>
 
 <!-- HERO -->
@@ -366,11 +365,11 @@
       <div class="two-col">
         <div class="role-block okta-block">
           <div class="role-label okta">Okta's Role</div>
-          <div class="role-text">Evaluates corporate credentials, network egress flags, and real-time device health to issue a secure user access token. In practice, an employee cannot access the agent unless they have authenticated with Okta MFA — and can be configured to require passing device compliance checks and clearing any active risk signals — making Okta the gatekeeper.</div>
+          <div class="role-text">Evaluates corporate credentials, network egress flags, and real-time device health to issue a secure user access token. In practice, an employee cannot access the agent unless they have authenticated with Okta MFA, and can be configured to require passing device compliance checks and clearing any active risk signals, making Okta the gatekeeper.</div>
         </div>
         <div class="role-block aws-block">
           <div class="role-label aws">AgentCore's Role</div>
-          <div class="role-text">Intercepts the request at the entry, validates Okta's access token, and spins up a runtime session. Every agent is gated on a verifiable Okta JWT — any session launched without a valid, unexpired token is rejected at the perimeter before any access is provisioned.</div>
+          <div class="role-text">Intercepts the request at the entry, validates Okta's access token, and spins up a runtime session. Every agent is gated on a verifiable Okta JWT; any session launched without a valid, unexpired token is rejected at the perimeter before any access is provisioned.</div>
         </div>
       </div>
       <div class="bottom-line">
@@ -401,11 +400,11 @@
       <div class="two-col">
         <div class="role-block okta-block">
           <div class="role-label okta">Okta's Role</div>
-          <div class="role-text">Acts as the Authorization Server to enforce global identity topologies and eliminate point-to-point app connections. It mints a token that cryptographically binds the human user and agent identities together. This allows the agent to cross application boundaries securely without exposing primary user tokens or relying on siloed, hardcoded credentials. Because the XAA grant is admin-configured at the org level, <strong>end users never see a consent screen</strong> — the agent operates silently on their behalf.</div>
+          <div class="role-text">Acts as the Authorization Server to enforce global identity topologies and eliminate point-to-point app connections. It mints a token that cryptographically binds the human user and agent identities together. This allows the agent to cross application boundaries securely without exposing primary user tokens or relying on siloed, hardcoded credentials. Because the XAA grant is admin-configured at the org level, <strong>end users never see a consent screen</strong>; the agent operates silently on their behalf.</div>
         </div>
         <div class="role-block aws-block">
           <div class="role-label aws">AgentCore's Role</div>
-          <div class="role-text">Maps the agent's intent to a secure runtime thread and routes the request—along with the user's primary identity context—to the AWS Lambda Interceptor. The Lambda function then manages the XAA flow with Okta, uses the scoped access token in memory to eliminate redundant API calls, and injects it directly into outbound headers.</div>
+          <div class="role-text">Maps the agent's intent to a secure runtime thread and routes the request, along with the user's primary identity context, to the AWS Lambda Interceptor. The Lambda function then manages the XAA flow with Okta, uses the scoped access token in memory to eliminate redundant API calls, and injects it directly into outbound headers.</div>
         </div>
       </div>
       <div class="bottom-line">
@@ -420,49 +419,13 @@
     </div>
   </div>
 
-  <!-- UC 4 -->
-  <div class="use-case-card" id="uc4" data-who="both">
-    <div class="card-header" onclick="toggle(this)">
-      <div class="uc-num" style="background:#FEF3C7; color:#92400E">4</div>
-      <div class="card-title-area">
-        <div class="card-title">Use Case 4: Agent Risk Signaling &amp; Coordinated Remediation</div>
-        <div class="card-scenario">As a security operator, I want AgentCore to detect and respond to policy violations immediately, and share those risk signals with Okta so the right remediation can be triggered — whether that&rsquo;s revoking connected resources, or suspending the underlying user.</div>
-        <div style="font-size:11px; color:var(--muted); font-style:italic; margin-top:6px;">⚠️ Note: This is a high-level illustration of how a coordinated agent kill switch could work — the full end-to-end flow is directional and in progress.</div>
-      </div>
-      </div>
-    <div class="card-body">
-      <div class="arch-diagram">
-        <div class="diag-label">Architecture Flow</div>
-        <img src="diagrams/UC4_Agent_Kill_Switch.png" alt="UC5 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
-      </div>
-      <div class="two-col">
-        <div class="role-block okta-block">
-          <div class="role-label okta">Okta's Role — Enterprise-Wide Remediation</div>
-          <div class="role-text">When Okta receives a risk signal from AgentCore, it determines the appropriate enterprise-wide response — this is where the scope expands beyond a single session. Okta can revoke the agent's corporate identity, deactivate the SaaS resources it is connected to, or suspend the underlying user account entirely. The right action depends on the severity of the signal, and customers configurations.</div>
-        </div>
-        <div class="role-block aws-block">
-          <div class="role-label aws">AgentCore's Role — Immediate Local Response &amp; Risk Signal</div>
-          <div class="role-text">AgentCore monitors live payloads and tool behavior against its policy engine. If a violation is detected, it can terminate the agent session immediately and on its own — it does not need Okta for that. But local termination only stops this session. AgentCore then sends a real-time risk signal to Okta so the broader threat — across identity, resources, and users — can be assessed and acted on.</div>
-        </div>
-      </div>
-      <div class="bottom-line">
-        <div class="bl-icon">&#128161;</div>
-        <div>
-          <div class="bl-label">The Bottom Line</div>
-          <div class="bl-text">AgentCore handles the immediate local threat autonomously; Okta handles the broader identity and resource response. Together they form a coordinated remediation loop — one that can escalate, when the situation demands it, all the way to a full agent kill switch across the enterprise.</div>
-          <button class="copy-btn" onclick="copyText(this, 'AgentCore handles the immediate local threat autonomously; Okta handles the broader identity and resource response. Together they form a coordinated remediation loop — one that can escalate, when the situation demands it, all the way to a full agent kill switch across the enterprise.')">&#128203; Copy talking point</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- UC 5 -->
   <div class="use-case-card" id="uc5" data-who="okta">
     <div class="card-header" onclick="toggle(this)">
-      <div class="uc-num" style="background:#EEF6FC; color:var(--okta)">5</div>
+      <div class="uc-num" style="background:#EEF6FC; color:var(--okta)">4</div>
       <div class="card-title-area">
-        <div class="card-title">Use Case 5: Two Independent Authorization Layers</div>
-        <div class="card-scenario">As a compliance manager, I want Okta's fine-grained permissions and AgentCore's Cedar policy engine to independently evaluate access and tool safety — so that each check is separately audited and neither system depends on the other to reach its decision.</div>
+        <div class="card-title">Use Case 4: Two Independent Authorization Layers</div>
+        <div class="card-scenario">As a compliance manager, I want Okta's fine-grained permissions and AgentCore's Cedar policy engine to independently evaluate access and tool safety, so that each check is separately audited and neither system depends on the other to reach its decision.</div>
       </div>
       </div>
     <div class="card-body">
@@ -473,19 +436,19 @@
       <div class="two-col">
         <div class="role-block okta-block">
           <div class="role-label okta">Okta's Role</div>
-          <div class="role-text">Okta's fine-grained permissions evaluate the user's relationship and security policies to answer whether the requesting user has a relationship that permits access to the resource. It produces its own permit or deny decision and writes to its own audit log — independently of what AgentCore does next.</div>
+          <div class="role-text">Okta's fine-grained permissions evaluate the user's relationship and security policies to answer whether the requesting user has a relationship that permits access to the resource. It produces its own permit or deny decision and writes to its own audit log, independently of what AgentCore does next.</div>
         </div>
         <div class="role-block aws-block">
           <div class="role-label aws">AgentCore's Role</div>
-          <div class="role-text">AgentCore's Cedar policy engine is attached to the AgentCore Gateway and evaluates each MCP tool call before it is invoked — independently guarding the execution layer. It evaluates tool-call parameters including the claims present in the token, and blocks any unsafe or out-of-scope call at the gateway before it reaches any backend. The result is written to AgentCore's own audit log.</div>
+          <div class="role-text">AgentCore's Cedar policy engine is attached to the AgentCore Gateway and evaluates each MCP tool call before it is invoked, independently guarding the execution layer. It evaluates tool-call parameters including the claims present in the token, and blocks any unsafe or out-of-scope call at the gateway before it reaches any backend. The result is written to AgentCore's own audit log.</div>
         </div>
       </div>
       <div class="bottom-line">
         <div class="bl-icon">&#128161;</div>
         <div>
           <div class="bl-label">The Bottom Line</div>
-          <div class="bl-text">Two authorization layers, each independently guarding its own domain — together they provide end-to-end coverage across both the identity and execution layers. Okta's fine-grained permissions answer whether the identity relationship permits access; AgentCore's Cedar engine answers whether the specific tool call is authorized to invoke. Failing either check blocks the action, and the combination covers risk surfaces that neither system could address alone.</div>
-          <button class="copy-btn" onclick="copyText(this, 'Two authorization layers, each independently guarding its own domain — together they provide end-to-end coverage across both the identity and execution layers. Okta\'s fine-grained permissions answer whether the identity relationship permits access; AgentCore\'s Cedar engine answers whether the specific tool call is safe to invoke. Failing either check blocks the action, and the combination covers risk surfaces that neither system could address alone.')">&#128203; Copy talking point</button>
+          <div class="bl-text">Two authorization layers, each independently guarding its own domain, together they provide end-to-end coverage across both the identity and execution layers. Okta's fine-grained permissions answer whether the identity relationship permits access; AgentCore's Cedar engine answers whether the specific tool call is authorized to invoke. Failing either check blocks the action, and the combination covers risk surfaces that neither system could address alone.</div>
+          <button class="copy-btn" onclick="copyText(this, 'Two authorization layers, each independently guarding its own domain, together they provide end-to-end coverage across both the identity and execution layers. Okta\'s fine-grained permissions answer whether the identity relationship permits access; AgentCore\'s Cedar engine answers whether the specific tool call is safe to invoke. Failing either check blocks the action, and the combination covers risk surfaces that neither system could address alone.')">&#128203; Copy talking point</button>
         </div>
       </div>
     </div>
@@ -494,9 +457,9 @@
   <!-- UC 6 -->
   <div class="use-case-card" id="uc6" data-who="aws">
     <div class="card-header" onclick="toggle(this)">
-      <div class="uc-num" style="background:#F0FDF4; color:var(--both)">6</div>
+      <div class="uc-num" style="background:#F0FDF4; color:var(--both)">5</div>
       <div class="card-title-area">
-        <div class="card-title">Use Case 6: Human in the Loop</div>
+        <div class="card-title">Use Case 5: Human in the Loop</div>
         <div class="card-scenario">As a security administrator, I want to ensure that high-stakes operations, such as large financial transfers or critical database changes, are paused until an explicit human approval is provided, so that no sensitive action completes without verified intent.</div>
       </div>
       </div>
@@ -508,11 +471,11 @@
       <div class="two-col">
         <div class="role-block okta-block">
           <div class="role-label okta">Okta's Role</div>
-          <div class="role-text">Sends an Okta Verify push to the approver's device and waits for confirmation before the agent takes any action — ensuring a human, not the agent, makes the final call on sensitive requests. Supervisor lookup and structured approval escalation are planned for the GA release.</div>
+          <div class="role-text">Sends an Okta Verify push to the approver's device and waits for confirmation before the agent takes any action, ensuring a human, not the agent, makes the final call on sensitive requests. Supervisor lookup and structured approval escalation are planned for the GA release.</div>
         </div>
         <div class="role-block aws-block">
           <div class="role-label aws">AgentCore's Role</div>
-          <div class="role-text">Detects a sensitive tool execution attempt against its HITL policy — such as a transaction over a defined threshold or an irreversible database operation — and hard-pauses the state machine before the tool is invoked. No further model output is generated and no tool call fires until AgentCore receives the signed confirmation callback from Okta.</div>
+          <div class="role-text">Detects a sensitive tool execution attempt against its HITL policy, such as a transaction over a defined threshold or an irreversible database operation, and hard-pauses the state machine before the tool is invoked. No further model output is generated and no tool call fires until AgentCore receives the signed confirmation callback from Okta.</div>
         </div>
       </div>
       <div class="bottom-line">
