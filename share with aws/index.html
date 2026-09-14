@@ -360,7 +360,7 @@
     <div class="card-body">
       <div class="arch-diagram">
         <div class="diag-label">Architecture Flow: Token Validation at the Runtime Boundary</div>
-        <img src="diagrams/UC2_Inbound_Agent_Activation.png" alt="UC2 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
+        <img src="diagrams/UC3_Conditional_Access_Agent_Runtime.png" alt="UC2 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
       </div>
       <div class="two-col">
         <div class="role-block okta-block">
@@ -369,7 +369,7 @@
         </div>
         <div class="role-block aws-block">
           <div class="role-label aws">AgentCore's Role</div>
-          <div class="role-text">Intercepts the request at the entry and independently re-enforces the policy outcome by verifying the claims embedded in the token before spinning up a session. Every agent is gated on a verifiable Okta JWT; any session launched without a valid, unexpired token is rejected at the perimeter before any access is provisioned.</div>
+          <div class="role-text">Intercepts the request at the entry and independently re-enforces the policy outcome by verifying the claims embedded in the token before spinning up a session. Every agent is gated on a verifiable Okta JWT; any session launched without a valid, unexpired token is rejected at the perimeter before any access is provisioned. To perform that validation, AgentCore fetches Okta's public signing keys from the authorization server's discovery URL, keeping the two systems decoupled but coordinated.</div>
         </div>
       </div>
       <div class="bottom-line">
@@ -431,7 +431,7 @@
     <div class="card-body">
       <div class="arch-diagram">
         <div class="diag-label">Architecture Flow: Two Complementary Authorization Layers</div>
-        <img src="diagrams/UC5_Fine_Grained_Authorization.png" alt="UC6 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
+        <img src="diagrams/UC4_Fine_Grained_Permissions.png" alt="UC4 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
       </div>
       <div class="two-col">
         <div class="role-block okta-block">
@@ -440,7 +440,7 @@
         </div>
         <div class="role-block aws-block">
           <div class="role-label aws">AgentCore's Role</div>
-          <div class="role-text">AgentCore's Cedar policy engine is attached to the AgentCore Gateway and evaluates each MCP tool call before it is invoked. It conditions on both tool-call parameters and the claims Okta emitted, so the identity context flows directly into the execution decision. Cedar operates on a default-deny basis, so any call that doesn't satisfy the policy is blocked at the gateway before reaching any backend. The result is written to AgentCore's own audit log.</div>
+          <div class="role-text">AgentCore's Cedar policy engine is attached to the AgentCore Gateway and evaluates each MCP tool call before it is invoked. It conditions on both tool-call parameters and the claims Okta emitted, so the identity context flows directly into the execution decision. Cedar operates on a default-deny basis, so any call that doesn't satisfy the policy is blocked at the gateway before reaching any backend. Note that AWS IAM and Cedar are distinct control layers: IAM governs who may call the AgentCore API at the AWS operation level; Cedar governs what tool calls are permitted inside the gateway. The result of each is written to AgentCore's own audit log.</div>
         </div>
       </div>
       <div class="bottom-line">
@@ -466,7 +466,7 @@
     <div class="card-body">
       <div class="arch-diagram">
         <div class="diag-label">Architecture Flow: Pause, Verify, Resume</div>
-        <img src="diagrams/UC6_Human_in_the_Loop.png" alt="UC7 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
+        <img src="diagrams/UC5_Step_Up_Authentication.png" alt="UC5 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
       </div>
       <div class="two-col">
         <div class="role-block okta-block">
@@ -475,7 +475,7 @@
         </div>
         <div class="role-block aws-block">
           <div class="role-label aws">AgentCore's Role</div>
-          <div class="role-text">Detects a sensitive tool execution attempt against its HITL policy, such as a transaction over a defined threshold or an irreversible database operation, and holds a pending authorization session before the tool is invoked. No tool call fires until AgentCore verifies the acr claim in the returned token, confirming the step-up level was met and the session is authorized. If the human does not respond within the configured timeout, the session terminates automatically.</div>
+          <div class="role-text">Detects a sensitive tool execution attempt and holds a pending authorization session before the tool is invoked. What counts as sensitive is defined in the Cedar gateway policy, not agent code, using the same policy engine as UC4. No tool call fires until AgentCore verifies the acr claim in the returned token, confirming the step-up level was met and the session is authorized. If the human does not respond within the configured timeout, the session terminates automatically.</div>
         </div>
       </div>
       <div class="bottom-line">
