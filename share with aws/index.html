@@ -1,9 +1,10 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Okta + AWS AgentCore: Field Decision Guide</title>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Okta + Amazon Bedrock AgentCore: Field Decision Guide</title>
 <style>
   :root {
     --okta: #007DC1;
@@ -259,6 +260,35 @@
     letter-spacing: 1px; color: var(--muted); margin-bottom: 8px;
   }
 
+  /* VISIBLE WORDING REVISIONS */
+  .revision-old {
+    color: #B91C1C;
+    background: #FEF2F2;
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+    border-radius: 3px;
+    padding: 1px 3px;
+  }
+  .revision-new {
+    color: #047857;
+    background: #ECFDF5;
+    font-weight: 600;
+    border-radius: 3px;
+    padding: 1px 3px;
+  }
+  .revision-block {
+    display: block;
+    margin-top: 6px;
+  }
+
+  /* FOOTER */
+
+  
+  
+
+  
+  
+
   /* FOOTER */
   .footer {
     text-align: center;
@@ -271,229 +301,211 @@
 </style>
 </head>
 <body>
-
 <!-- TOP BAR -->
 <div class="topbar">
-  <div class="topbar-left">
-    <span class="badge-okta">OKTA</span>
-    <span style="color:#4B5563; font-size:18px;">+</span>
-    <span class="badge-aws">AWS AgentCore</span>
-    <span style="color:#4B5563; font-size:16px; margin: 0 4px;">|</span>
-    <h1>Field Decision Guide</h1>
-  </div>
-  <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
-    <span class="topbar-tag">&#128274; Internal Only</span>
-    <span style="font-size:11px; color:#9CA3AF;">Kapil Patil &middot; kapil.patil@okta.com</span>
-  </div>
+<div class="topbar-left">
+<span class="badge-okta">OKTA</span>
+<span style="color:#4B5563; font-size:18px;">+</span>
+<span class="badge-aws">Amazon Bedrock AgentCore</span>
+<span style="color:#4B5563; font-size:16px; margin: 0 4px;">|</span>
+<h1>Field Decision Guide</h1>
 </div>
-
+<div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
+<span class="topbar-tag">🔒 Internal Only</span>
+<span style="font-size:11px; color:#9CA3AF;">Kapil Patil · kapil.patil@okta.com</span>
+</div>
+</div>
 <!-- JUMP NAV -->
 <div class="jumpnav">
-  <a href="#uc1">1. Registering Agents</a>
-  <a href="#uc2">2. Zero-Trust Inbound Agent Activation</a>
-  <a href="#uc3">3. Cross App Access</a>
-  <a href="#uc5">4. Two Independent Authorization Layers</a>
-  <a href="#uc6">5. Human in the Loop</a>
+<a href="#uc1">1. Registering Agents</a>
+<a href="#uc2">2. Zero-Trust Inbound Agent Activation</a>
+<a href="#uc3">3. Cross App Access</a>
+<a href="#uc5">4. Two Independent Authorization Layers</a>
+<a href="#uc6">5. Human in the Loop</a>
 </div>
-
 <!-- HERO -->
 <div class="hero">
-  <div class="hero-label">Joint Okta &amp; AgentCore Use Cases (Where They Interlock)</div>
-  <h2>When to use Okta &amp; when to use AWS AgentCore</h2>
-  <p>Your in-conversation reference for customer meetings. Each card shows a real use case.</p>
-  <div style="display:inline-flex; align-items:flex-start; gap:8px; margin-top:14px; padding:10px 16px; background:#F8F9FA; border:1px solid var(--border); border-radius:8px; font-size:12px; color:var(--muted); font-style:italic; max-width:620px;">
-    <span style="font-style:normal; flex-shrink:0;">⚙️</span>
-    <span><strong style="font-style:normal; color:var(--text);">Assumed context:</strong> All use cases on this page apply to organizations that already run Okta as their corporate IdP and AWS AgentCore as their agent platform.</span>
-  </div>
-
+<div class="hero-label">Better Together: Okta and Amazon Bedrock AgentCore</div>
+<h2>Integration patterns for customers using Okta and Amazon Bedrock AgentCore</h2>
+<p>These patterns are designed for organizations using Okta as their corporate identity provider and Amazon Bedrock AgentCore as their agent platform.</p>
 </div>
-
 <!-- MATRIX -->
 <div class="matrix-wrap">
-
-
-
-  <!-- UC 1 -->
-  <div class="use-case-card" id="uc1" data-who="both">
-    <div class="card-header" onclick="toggle(this)">
-      <div class="uc-num" style="background:#FFF7ED; color:#C2410C">1</div>
-      <div class="card-title-area">
-        <div class="card-title">Use Case 1: Registering Agents</div>
-        <div class="card-scenario">As a governance lead, I want to register and catalog every AI agent as a governed entity, so that I can prevent &ldquo;shadow AI&rdquo; and maintain full corporate accountability and compliance oversight for every digital worker.</div>
-      </div>
-      </div>
-    <div class="card-body">
-      <div class="arch-diagram">
-        <div class="diag-label">Architecture Flow: Dual Registry, Identity + Runtime Governance</div>
-        <img src="diagrams/UC1_Okta_Policy_Enforcement_Access_Control.png" alt="UC1 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
-      </div>
-      <div class="two-col">
-        <div class="role-block okta-block">
-          <div class="role-label okta">Okta's Role: Corporate Identity Registry</div>
-          <div class="role-text">Okta registers the agent as a governed corporate identity with named human owners, a certification schedule, and a deactivation path. Okta answers <strong>who is accountable</strong> for this agent and regulates access.</div>
-        </div>
-        <div class="role-block aws-block">
-          <div class="role-label aws">AgentCore's Role: Runtime Identity Registry</div>
-          <div class="role-text">AgentCore Identity gives that same agent a <strong>workload identity</strong> inside AWS, so it can prove itself to AWS services and obtain scoped outbound credentials without embedded secrets. AgentCore Identity answers <strong>how this agent authenticates</strong> and obtains credentials at runtime.</div>
-        </div>
-      </div>
-      <div class="bottom-line">
-        <div class="bl-icon">&#128161;</div>
-        <div>
-          <div class="bl-label">Why You Need Both</div>
-          <div class="bl-text">Okta registers the agent as a governed corporate identity with named human owners, a certification schedule, and a deactivation path. When a runtime is decommissioned, Okta deactivates the bound identity, closing the governance loop. AgentCore Identity gives that same agent a workload identity inside AWS, so it can prove itself to AWS services and obtain scoped outbound credentials without embedded secrets. <strong>Okta answers who is accountable</strong> for this agent and regulates access. <strong>AgentCore Identity answers how this agent authenticates</strong> and obtains credentials at runtime.</div>
-          <button class="copy-btn" onclick="copyText(this, 'Okta registers the agent as a governed corporate identity with named human owners, a certification schedule, and a deactivation path. When a runtime is decommissioned, Okta deactivates the bound identity, closing the governance loop. AgentCore Identity gives that same agent a workload identity inside AWS, so it can prove itself to AWS services and obtain scoped outbound credentials without embedded secrets. Okta answers who is accountable for this agent and regulates access. AgentCore Identity answers how this agent authenticates and obtains credentials at runtime.')">&#128203; Copy talking point</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- UC 2 -->
-  <div class="use-case-card" id="uc2" data-who="okta">
-    <div class="card-header" onclick="toggle(this)">
-      <div class="uc-num" style="background:#EEF6FC; color:var(--okta)">2</div>
-      <div class="card-title-area">
-        <div class="card-title">Use Case 2: Zero-Trust Inbound Agent Activation</div>
-        <div class="card-scenario">As a system administrator, I want to restrict access to my AI Agent to only risk-verified and authenticated employees, so that AgentCore runtime is only accessed within a verified identity.</div>
-      </div>
-      </div>
-    <div class="card-body">
-      <div class="arch-diagram">
-        <div class="diag-label">Architecture Flow: Token Validation at the Runtime Boundary</div>
-        <img src="diagrams/UC3_Conditional_Access_Agent_Runtime.png" alt="UC2 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
-      </div>
-      <div class="two-col">
-        <div class="role-block okta-block">
-          <div class="role-label okta">Okta's Role</div>
-          <div class="role-text">Evaluates corporate credentials, network egress flags, and real-time device health to issue a secure user access token. The policy outcome, including MFA, risk level, and device state, is stamped into the token as claims, carrying the enforcement decision forward. In practice, an employee cannot access the agent unless they have authenticated with Okta MFA, and can be configured to require passing device compliance checks and clearing any active risk signals, making Okta the gatekeeper.</div>
-        </div>
-        <div class="role-block aws-block">
-          <div class="role-label aws">AgentCore's Role</div>
-          <div class="role-text">Intercepts the request at the entry and independently re-enforces the policy outcome by verifying the claims embedded in the token before spinning up a session. Every agent is gated on a verifiable Okta JWT; any session launched without a valid, unexpired token is rejected at the perimeter before any access is provisioned. To perform that validation, AgentCore fetches Okta's public signing keys from the authorization server's discovery URL, keeping the two systems decoupled but coordinated.</div>
-        </div>
-      </div>
-      <div class="bottom-line">
-        <div class="bl-icon">&#128161;</div>
-        <div>
-          <div class="bl-label">Why You Need Both</div>
-          <div class="bl-text">Okta verifies identity, MFA, and device health before issuing a token, ensuring only the right people can activate the agent. AgentCore uses that token as the condition for spinning up the runtime session, tying every compute resource to a verified identity. Okta evaluates policy at authentication; AgentCore re-enforces it at the execution boundary, the same policy outcome checked twice at two different control points. Together they ensure every agent session starts from a known, trusted state.</div>
-          <button class="copy-btn" onclick="copyText(this, 'Okta verifies identity, MFA, and device health before issuing a token, ensuring only the right people can activate the agent. AgentCore uses that token as the condition for spinning up the runtime session, tying every compute resource to a verified identity. Okta evaluates policy at authentication; AgentCore re-enforces it at the execution boundary, the same policy outcome checked twice at two different control points. Together they ensure every agent session starts from a known, trusted state.')">&#128203; Copy talking point</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- UC 3 -->
-  <div class="use-case-card" id="uc3" data-who="both">
-    <div class="card-header" onclick="toggle(this)">
-      <div class="uc-num" style="background:#FFF4E6; color:#B45309">3</div>
-      <div class="card-title-area">
-        <div class="card-title">Use Case 3: Cross App Access (On-Behalf-Of a user flow)</div>
-        <div class="card-scenario">As an agent developer, I want my AI agents to fetch data from external SaaS applications (such as Salesforce or Slack) using the authority of a human user, so that the agent operates within user's allowed permissions.</div>
-      </div>
-      </div>
-    <div class="card-body">
-      <div class="arch-diagram">
-        <div class="diag-label">Cross App Access Flow</div>
-        <img src="diagrams/UC2_Cross_Boundary_Tool_Execution.png" alt="UC3 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
-      </div>
-      <div class="two-col">
-        <div class="role-block okta-block">
-          <div class="role-label okta">Okta's Role</div>
-          <div class="role-text">Acts as the Authorization Server for the first leg of the XAA flow, issuing a short-lived delegation credential that asserts the agent is authorized to act on the user's behalf. This credential cryptographically binds the two identities together, allowing the agent to cross application boundaries without exposing primary user tokens. Because the XAA grant is admin-configured at the org level, <strong>end users never see a consent screen</strong>; the agent operates silently on their behalf.</div>
-        </div>
-        <div class="role-block aws-block">
-          <div class="role-label aws">AgentCore's Role</div>
-          <div class="role-text">Routes the request to the AWS Lambda Interceptor, which runs both legs of the XAA flow: redeeming Okta's delegation credential at the resource app's own authorization server to obtain a scoped access token, then injecting it directly into outbound headers. The token is held in memory, eliminating redundant exchanges on subsequent calls.</div>
-        </div>
-      </div>
-      <div class="bottom-line">
-        <div class="bl-icon">&#128161;</div>
-        <div>
-          <div class="bl-label">Why You Need Both</div>
-          <div class="bl-text">Okta mints a token that cryptographically binds the human user and agent together. AgentCore routes that token into outbound requests, eliminating redundant exchanges. Okta handles the first leg, issuing a delegation credential; AgentCore's Lambda interceptor redeems it at the resource app's own auth server to get the final access token. Together they enable scoped, user-bound access across application boundaries with no stored credentials.</div>
-          <button class="copy-btn" onclick="copyText(this, 'Okta mints a token that cryptographically binds the human user and agent together. AgentCore routes that token into outbound requests, eliminating redundant exchanges. Okta handles the first leg, issuing a delegation credential; AgentCore\'s Lambda interceptor redeems it at the resource app\'s own auth server to get the final access token. Together they enable scoped, user-bound access across application boundaries with no stored credentials.')">&#128203; Copy talking point</button>
-        </div>
-      </div>
-      <p style="font-size:11px; color:var(--muted); font-style:italic; margin-top:10px;">&#128221; <strong>Note:</strong> The Lambda interceptor pattern is an interim solution, required because XAA involves two legs at two different authorization servers: Okta for the first, and the resource app's own auth server for the second. AgentCore's built-in on-behalf-of path handles a single exchange against one provider and does not cover this two-leg flow, which is why the custom interceptor is needed today. The partnership team is actively collaborating with AWS to build native cross-app access directly into the AWS AgentCore credential provider, which will eliminate this pattern and make token handling completely seamless.</p>
-    </div>
-  </div>
-
-  <!-- UC 4 -->
-  <div class="use-case-card" id="uc5" data-who="okta">
-    <div class="card-header" onclick="toggle(this)">
-      <div class="uc-num" style="background:#EEF6FC; color:var(--okta)">4</div>
-      <div class="card-title-area">
-        <div class="card-title">Use Case 4: Layered Authorization: Identity to Execution</div>
-        <div class="card-scenario">As a compliance manager, I want Okta's fine-grained permissions to evaluate identity context and emit it as claims, and AgentCore's Cedar policy engine to condition on those claims plus tool parameters, so that each check is separately audited and access is evaluated end-to-end from identity to execution.</div>
-      </div>
-      </div>
-    <div class="card-body">
-      <div class="arch-diagram">
-        <div class="diag-label">Architecture Flow: Two Complementary Authorization Layers</div>
-        <img src="diagrams/UC4_Fine_Grained_Permissions.png" alt="UC4 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
-      </div>
-      <div class="two-col">
-        <div class="role-block okta-block">
-          <div class="role-label okta">Okta's Role</div>
-          <div class="role-text">Okta's fine-grained permissions evaluate the user's identity relationship and security policies, then emit the outcome as claims in the access token. These claims, including identity context, MFA, and risk signals, are what Cedar conditions on downstream. Okta writes its own permit or deny decision to its own audit log.</div>
-        </div>
-        <div class="role-block aws-block">
-          <div class="role-label aws">AgentCore's Role</div>
-          <div class="role-text">AgentCore's Cedar policy engine is attached to the AgentCore Gateway and evaluates each MCP tool call before it is invoked. It conditions on both tool-call parameters and the claims Okta emitted, so the identity context flows directly into the execution decision. Cedar operates on a default-deny basis, so any call that doesn't satisfy the policy is blocked at the gateway before reaching any backend. Note that AWS IAM and Cedar are distinct control layers: IAM governs who may call the AgentCore API at the AWS operation level; Cedar governs what tool calls are permitted inside the gateway. The result of each is written to AgentCore's own audit log.</div>
-        </div>
-      </div>
-      <div class="bottom-line">
-        <div class="bl-icon">&#128161;</div>
-        <div>
-          <div class="bl-label">Why You Need Both</div>
-          <div class="bl-text">Okta determines what identity context is expressible; Cedar determines what tool calls that context permits. Each layer writes to its own audit log, but the decision is sequential: Okta's claims are Cedar's input. Failing either check blocks the action, and together they provide coverage from identity relationship to tool execution that neither system could achieve alone.</div>
-          <button class="copy-btn" onclick="copyText(this, 'Okta determines what identity context is expressible; Cedar determines what tool calls that context permits. Each layer writes to its own audit log, but the decision is sequential: Okta\'s claims are Cedar\'s input. Failing either check blocks the action, and together they provide coverage from identity relationship to tool execution that neither system could achieve alone.')">&#128203; Copy talking point</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- UC 5 -->
-  <div class="use-case-card" id="uc6" data-who="aws">
-    <div class="card-header" onclick="toggle(this)">
-      <div class="uc-num" style="background:#F0FDF4; color:var(--both)">5</div>
-      <div class="card-title-area">
-        <div class="card-title">Use Case 5: Human in the Loop</div>
-        <div class="card-scenario">As a security administrator, I want to ensure that high-stakes operations, such as large financial transfers or critical database changes, are paused until an explicit human approval is provided, so that no sensitive action completes without verified intent.</div>
-      </div>
-      </div>
-    <div class="card-body">
-      <div class="arch-diagram">
-        <div class="diag-label">Architecture Flow: Pause, Verify, Resume</div>
-        <img src="diagrams/UC5_Step_Up_Authentication.png" alt="UC5 Architecture Flow" style="max-width:100%;display:block;margin:8px auto 0;">
-      </div>
-      <div class="two-col">
-        <div class="role-block okta-block">
-          <div class="role-label okta">Okta's Role</div>
-          <div class="role-text">Sends an Okta Verify push to the approver's device and re-challenges with MFA before the agent takes any action, ensuring a human, not the agent, makes the final call on sensitive requests. Okta stamps the step-up outcome as an acr claim in the token, giving AgentCore verifiable proof of the authentication level achieved, not just that a token was issued. Supervisor lookup and structured approval escalation are planned for the GA release.</div>
-        </div>
-        <div class="role-block aws-block">
-          <div class="role-label aws">AgentCore's Role</div>
-          <div class="role-text">Detects a sensitive tool execution attempt and holds a pending authorization session before the tool is invoked. What counts as sensitive is defined in the Cedar gateway policy, not agent code, using the same policy engine as UC4. No tool call fires until AgentCore verifies the acr claim in the returned token, confirming the step-up level was met and the session is authorized. If the human does not respond within the configured timeout, the session terminates automatically.</div>
-        </div>
-      </div>
-      <div class="bottom-line">
-        <div class="bl-icon">&#128161;</div>
-        <div>
-          <div class="bl-label">Why You Need Both</div>
-          <div class="bl-text">AgentCore detects the sensitive operation and holds the pending session before any tool fires; without it, there is no interception point. Okta re-challenges the human with MFA and stamps the step-up level as an acr claim in the token. Together they ensure no high-stakes action completes without verified, acr-backed human confirmation.</div>
-          <button class="copy-btn" onclick="copyText(this, 'AgentCore detects the sensitive operation and holds the pending session before any tool fires; without it, there is no interception point. Okta re-challenges the human with MFA and stamps the step-up level as an acr claim in the token. Together they ensure no high-stakes action completes without verified, acr-backed human confirmation.')">&#128203; Copy talking point</button>
-        </div>
-      </div>
-    </div>
-  </div>
+<!-- UC 1 -->
+<div class="use-case-card" data-who="both" id="uc1">
+<div class="card-header" onclick="toggle(this)">
+<div class="uc-num" style="background:#FFF7ED; color:#C2410C">1</div>
+<div class="card-title-area">
+<div class="card-title">Use Case 1: Registering Agents</div>
+<div class="card-scenario">As a governance lead, I want to register and catalog every AI agent as a governed entity, so that I can prevent “shadow AI” and maintain full corporate accountability and compliance oversight for every digital worker.</div>
 </div>
-
+</div>
+<div class="card-body">
+<div class="arch-diagram">
+<div class="diag-label">Architecture Flow: Dual Registry, Identity + Runtime Governance</div>
+<img alt="UC1 Architecture Flow" src="diagrams/UC1_Okta_Policy_Enforcement_Access_Control.png" style="max-width:100%;display:block;margin:8px auto 0;"/>
+</div>
+<div class="two-col">
+<div class="role-block okta-block">
+<div class="role-label okta">Okta's Role: Corporate Identity Registry</div>
+<div class="role-text">Okta registers the agent as a governed corporate identity with named human owners, a certification schedule, and a deactivation path. When a sync detects an agent has been deprovisioned, Okta blocks it from requesting OAuth tokens upon detection. Agents that fail to provision are held in a Suspended state and cannot obtain authorization grants until resolved. Okta answers <strong>who is accountable</strong> for this agent and regulates access.</div>
+</div>
+<div class="role-block aws-block">
+<div class="role-label aws">AgentCore's Role: Runtime Identity Registry</div>
+<div class="role-text">AgentCore Identity gives that same agent a <strong>workload identity</strong> inside AWS, so it can prove itself to AWS services and obtain scoped outbound credentials without embedded secrets. AgentCore Identity answers <strong>how this agent authenticates</strong> and obtains credentials at runtime.</div>
+</div>
+</div>
+<div class="bottom-line">
+<div class="bl-icon">💡</div>
+<div>
+<div class="bl-label">How Okta and AgentCore Work Together</div>
+<div class="bl-text">Okta adds corporate ownership, certification, and lifecycle context to the agent identity. Amazon Bedrock AgentCore Identity provides the agent's runtime workload identity and scoped access to AWS resources without embedded credentials. Customers using both can connect corporate accountability with secure runtime authentication and credential access.</div>
+<button class="copy-btn" onclick="copyText(this, 'Okta adds corporate ownership, certification, and lifecycle context to the agent identity. Amazon Bedrock AgentCore Identity provides the agent\'s runtime workload identity and scoped access to AWS resources without embedded credentials. Customers using both can connect corporate accountability with secure runtime authentication and credential access.')">📋 Copy proposed talking point</button>
+</div>
+</div>
+</div>
+</div>
+<!-- UC 2 -->
+<div class="use-case-card" data-who="okta" id="uc2">
+<div class="card-header" onclick="toggle(this)">
+<div class="uc-num" style="background:#EEF6FC; color:var(--okta)">2</div>
+<div class="card-title-area">
+<div class="card-title">Use Case 2: Zero-Trust Inbound Agent Activation</div>
+<div class="card-scenario">As a system administrator, I want to restrict access to my AI Agent to only risk-verified and authenticated employees,  so that the AgentCore runtime is accessed only by verified and authorized identities.</div>
+</div>
+</div>
+<div class="card-body">
+<div class="arch-diagram">
+<div class="diag-label">Architecture Flow: Token Validation at the Runtime Boundary</div>
+<img alt="UC2 Architecture Flow" src="diagrams/UC3_Conditional_Access_Agent_Runtime.png" style="max-width:100%;display:block;margin:8px auto 0;"/>
+</div>
+<div class="two-col">
+<div class="role-block okta-block">
+<div class="role-label okta">Okta's Role</div>
+<div class="role-text">Evaluates corporate credentials, network egress flags, and real-time device health to issue a secure user access token. The policy outcome, including MFA, risk level, and device state, is stamped into the token as claims, carrying the enforcement decision forward. In this pattern, Okta authenticates the employee and provides corporate identity, MFA, device, and risk context in the issued token.</div>
+</div>
+<div class="role-block aws-block">
+<div class="role-label aws">AgentCore's Role</div>
+<div class="role-text">When the runtime is configured with an inbound JWT authorizer, Amazon Bedrock AgentCore intercepts each request at the runtime boundary and independently enforces those configured authorization requirements by validating the Okta-issued JWT before starting a session. AgentCore can be configured to validate attributes such as the token's audience, client, scope, expiration, and configured claims. It obtains Okta's public signing keys from the configured OIDC discovery URL, allowing the two systems to remain decoupled while coordinating identity and runtime enforcement.</div>
+</div>
+</div>
+<div class="bottom-line">
+<div class="bl-icon">💡</div>
+<div>
+<div class="bl-label">How Okta and AgentCore Work Together</div>
+<div class="bl-text">Okta verifies identity, MFA, and device health before issuing a token, ensuring only the right people can activate the agent. AgentCore uses that token as the condition for spinning up the runtime session, tying every compute resource to a verified identity. Okta evaluates policy at authentication; AgentCore re-enforces it at the execution boundary, the same policy outcome checked twice at two different control points. Together they ensure every agent session starts from a known, trusted state.</div>
+<button class="copy-btn" onclick="copyText(this, 'Okta verifies identity, MFA, and device health before issuing a token, ensuring only the right people can activate the agent. AgentCore uses that token as the condition for spinning up the runtime session, tying every compute resource to a verified identity. Okta evaluates policy at authentication; AgentCore re-enforces it at the execution boundary, the same policy outcome checked twice at two different control points. Together they ensure every agent session starts from a known, trusted state.')">📋 Copy talking point</button>
+</div>
+</div>
+</div>
+</div>
+<!-- UC 3 -->
+<div class="use-case-card" data-who="both" id="uc3">
+<div class="card-header" onclick="toggle(this)">
+<div class="uc-num" style="background:#FFF4E6; color:#B45309">3</div>
+<div class="card-title-area">
+<div class="card-title">Use Case 3: Cross App Access (On-Behalf-Of a user flow)</div>
+<div class="card-scenario">As an agent developer, I want my AI agents to fetch data from external SaaS applications (such as Salesforce or Slack) using the authority of a human user, so that the agent operates within user's allowed permissions.</div>
+</div>
+</div>
+<div class="card-body">
+<div class="arch-diagram">
+<div class="diag-label">Cross App Access Flow</div>
+<img alt="UC3 Architecture Flow" src="diagrams/UC2_Cross_Boundary_Tool_Execution.png" style="max-width:100%;display:block;margin:8px auto 0;"/>
+</div>
+<div class="two-col">
+<div class="role-block okta-block">
+<div class="role-label okta">Okta's Role</div>
+<div class="role-text">Acts as the Authorization Server for the first leg of the XAA flow, issuing a short-lived delegation credential that asserts the agent is authorized to act on the user's behalf. This credential cryptographically binds the two identities together, allowing the agent to cross application boundaries without exposing primary user tokens. Because the XAA grant is admin-configured at the org level, <strong>end users never see a consent screen</strong>; the agent operates silently on their behalf.</div>
+</div>
+<div class="role-block aws-block">
+<div class="role-label aws">AgentCore's Role</div>
+<div class="role-text">Routes the request to the AWS Lambda Interceptor, which runs both legs of the XAA flow: redeeming Okta's delegation credential at the resource app's own authorization server to obtain a scoped access token, then injecting it directly into outbound headers. The token is held in Lambda memory, scoped to the handler, and does not persist across container reuse.</div>
+</div>
+</div>
+<div class="bottom-line">
+<div class="bl-icon">💡</div>
+<div>
+<div class="bl-label">How Okta and AgentCore Work Together</div>
+<div class="bl-text">Okta mints a token that cryptographically binds the human user and agent together. AgentCore routes that token into outbound requests, eliminating redundant exchanges. Okta handles the first leg, issuing a delegation credential; AgentCore's Lambda interceptor redeems it at the resource app's own auth server to get the final access token. Together they enable scoped, user-bound access across application boundaries with no stored credentials.</div>
+<button class="copy-btn" onclick="copyText(this, 'Okta mints a token that cryptographically binds the human user and agent together. AgentCore routes that token into outbound requests, eliminating redundant exchanges. Okta handles the first leg, issuing a delegation credential; AgentCore\'s Lambda interceptor redeems it at the resource app\'s own auth server to get the final access token. Together they enable scoped, user-bound access across application boundaries with no stored credentials.')">📋 Copy talking point</button>
+</div>
+</div>
+<p style="font-size:11px; color:var(--muted); font-style:italic; margin-top:10px;">📝 <strong>Implementation pattern:</strong> For cross-app access involving Okta and a resource application's authorization server, customers can configure an AWS Lambda interceptor on AgentCore Gateway to coordinate the two token exchanges and attach a scoped access token to the outbound tool call. This pattern combines Okta's delegated identity context with AgentCore Gateway's request interception and routing capabilities without storing primary user credentials.</p>
+</div>
+</div>
+<!-- UC 4 -->
+<div class="use-case-card" data-who="okta" id="uc5">
+<div class="card-header" onclick="toggle(this)">
+<div class="uc-num" style="background:#EEF6FC; color:var(--okta)">4</div>
+<div class="card-title-area">
+<div class="card-title">Use Case 4: Layered Authorization: Identity to Execution</div>
+<div class="card-scenario">As a compliance manager, I want Okta's fine-grained permissions to evaluate identity context and emit it as claims, and the AgentCore Policy engine associated with Amazon Bedrock AgentCore Gateway to evaluate those claims together with tool parameters, so that each check is separately audited and access is evaluated end-to-end from identity to execution.</div>
+</div>
+</div>
+<div class="card-body">
+<div class="arch-diagram">
+<div class="diag-label">Architecture Flow: Okta Identity Context Evaluated by AgentCore Policy at AgentCore Gateway</div>
+<img alt="UC4 Architecture Flow" src="diagrams/UC4_Fine_Grained_Permissions.png" style="max-width:100%;display:block;margin:8px auto 0;"/>
+</div>
+<div class="two-col">
+<div class="role-block okta-block">
+<div class="role-label okta">Okta's Role</div>
+<div class="role-text">Okta's fine-grained permissions evaluate the user's identity relationship and security policies, then emit the outcome as claims in the access token. These claims, including identity context, MFA, and risk signals, are the identity context that AgentCore Policy evaluates downstream. Okta writes its own permit or deny decision to its own audit log.</div>
+</div>
+<div class="role-block aws-block">
+<div class="role-label aws">AgentCore's Role</div>
+<div class="role-text">When a policy engine is associated with the gateway, Amazon Bedrock AgentCore Gateway receives each MCP tool call and the associated AgentCore Policy engine evaluates it before the target is invoked. Configured this way, AgentCore Policy uses Cedar policies to evaluate both tool-call parameters and the claims Okta emitted, so identity context flows directly into the execution decision. AgentCore Policy uses default-deny semantics, so a call that does not satisfy a policy is blocked before reaching the target. AWS IAM and AgentCore Policy remain distinct control layers operating on different principals: IAM authorizes the AWS API call that delivers the tool call, while AgentCore Policy authorizes the tool call itself, down to individual input parameters. Each layer evaluates independently. With traces enabled on the Gateway, AgentCore Policy writes a per-tool-call permit or deny decision to CloudWatch — including the authorization reason and determining policies — giving each layer a queryable audit record with the deciding policy attached.</div>
+</div>
+</div>
+<div class="bottom-line">
+<div class="bl-icon">💡</div>
+<div>
+<div class="bl-label">How Okta and AgentCore Work Together</div>
+<div class="bl-text">Okta determines what identity context is expressible; AgentCore Policy determines what tool calls that context permits. Each layer writes to its own audit log, but the decision is sequential: Okta's claims are an input to AgentCore Policy evaluation. Each control evaluates its configured policy before the action proceeds. Together, they coordinate corporate identity context with tool-level execution controls and provide an audit record at each layer.</div>
+<button class="copy-btn" onclick="copyText(this, 'Okta determines what identity context is expressible; AgentCore Policy determines what tool calls that context permits. Each layer writes to its own audit log, but the decision is sequential: Okta\'s claims are an input to AgentCore Policy evaluation. Each control evaluates its configured policy before the action proceeds. Together, they coordinate corporate identity context with tool-level execution controls and provide an audit record at each layer.')">📋 Copy proposed talking point</button>
+</div>
+</div>
+</div>
+</div>
+<!-- UC 5 -->
+<div class="use-case-card" data-who="aws" id="uc6">
+<div class="card-header" onclick="toggle(this)">
+<div class="uc-num" style="background:#F0FDF4; color:var(--both)">5</div>
+<div class="card-title-area">
+<div class="card-title">Use Case 5: Human in the Loop</div>
+<div class="card-scenario">As a security administrator, I want to ensure that high-stakes operations, such as large financial transfers or critical database changes, are paused until an explicit human approval is provided, so that no sensitive action completes without verified intent.</div>
+</div>
+</div>
+<div class="card-body">
+<div class="arch-diagram">
+<div class="diag-label">Architecture Flow: Pause, Verify, Resume</div>
+<img alt="UC5 Architecture Flow" src="diagrams/UC5_Step_Up_Authentication.png" style="max-width:100%;display:block;margin:8px auto 0;"/>
+</div>
+<div class="two-col">
+<div class="role-block okta-block">
+<div class="role-label okta">Okta's Role</div>
+<div class="role-text">Re-challenges the designated approver with MFA, for example an Okta Verify push, before the agent takes any action, ensuring a human, not the agent, makes the final call on sensitive requests. Okta stamps the step-up outcome into the token as an <code>amr</code> claim (Okta-specific values: <code>okta_verify</code>, <code>swk</code> for Verify push), giving AgentCore verifiable proof of the authentication method, not just that a token was issued.</div>
+</div>
+<div class="role-block aws-block">
+<div class="role-label aws">AgentCore's Role</div>
+<div class="role-text">Configured for this pattern, Amazon Bedrock AgentCore provides the runtime interception point: the agent can request step-up for a specified user identity before a sensitive operation and hold a pending authorization session until the tool runs. Once the human completes the Okta step-up challenge, AgentCore can be configured to require the step-up claim, <code>acr</code> or <code>amr</code>, in the returned token before the session proceeds. If the human does not respond within the configured session timeout, the session terminates automatically.</div>
+</div>
+</div>
+<div class="bottom-line">
+<div class="bl-icon">💡</div>
+<div>
+<div class="bl-label">How Okta and AgentCore Work Together</div>
+<div class="bl-text">Configured for this pattern, AgentCore provides the runtime interception point and holds the pending authorization session before any tool runs. Okta re-challenges the human with MFA and stamps the step-up level as an acr claim in the token. Together they ensure no high-stakes action completes without verified, acr-backed human confirmation.</div>
+<button class="copy-btn" onclick="copyText(this, 'Configured for this pattern, AgentCore provides the runtime interception point and holds the pending authorization session before any tool runs. Okta re-challenges the human with MFA and stamps the step-up level as an acr claim in the token. Together they ensure no high-stakes action completes without verified, acr-backed human confirmation.')">📋 Copy proposed talking point</button>
+</div>
+</div>
+</div>
+</div>
+</div>
 <div class="footer">
-  Okta + AWS AgentCore &nbsp;&middot;&nbsp; Internal Use Only &nbsp;&middot;&nbsp; Source: "Better Together: O4AA &amp; AWS AgentCore" solution blueprint
+  Okta + <span class="revision-new">Amazon Bedrock AgentCore</span>  ·  Internal Use Only  ·  Source: "Better Together: O4AA &amp; AWS AgentCore" solution blueprint
 </div>
-
 <script>
 
 
